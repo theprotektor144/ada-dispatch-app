@@ -34,7 +34,8 @@ from jose import jwt, JWTError
 # -----------------------------
 # Config (set env vars in prod)
 # -----------------------------
-DATABASE_URL = os.getenv("ADA_DATABASE_URL", "sqlite:///./ada.db")
+DATABASE_URL = os.getenv("ADA_DATABASE_URL", "sqlite:////tmp/ada.db")
+
 SECRET_KEY = os.getenv("ADA_SECRET_KEY", "CHANGE_ME_TO_A_LONG_RANDOM_SECRET")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ADA_TOKEN_MINUTES", "1440"))  # 24 hours
