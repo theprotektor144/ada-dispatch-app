@@ -433,25 +433,23 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
             status_code=500,
             detail=f"Server error during registration: {type(e).__name__}: {str(e)}"
         )
+@app.post("/auth/login", response_model=TokenResponse)
+def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == form.username).first()
+    if not user or not verify_password(form.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token(
+        sub=user.email,
+        tenant_id=user.tenant_id,
+        role=user.role
+    )
+    return TokenResponse(access_token=token)
 
         
 
 
-Deploy failed for 2735632: Update app.py
-Exited with status 1 while running your code. Check your deploy logs for more information.
-January 5, 2026 at 3:50 AM
-    if db.query(User).filter(User.email == payload.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
 
-    u = User(
-        tenant_id=current_user.tenant_id,
-        email=payload.email,
-        password_hash=hash_password(payload.password),
-        role=payload.role
-    )
-    db.add(u)
-    db.commit()
-    return {"ok": True, "email": u.email, "role": u.role}
 
 @app.patch("/tenant/users/{email}", response_model=dict)
 def change_role(email: str, payload: ChangeRoleRequest, current_user: User = Depends(require_role({"OWNER"})), db: Session = Depends(get_db)):
