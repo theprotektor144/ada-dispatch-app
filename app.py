@@ -26,6 +26,7 @@ from sqlalchemy import (
     create_engine, Integer, String, Float, DateTime, ForeignKey, Text, JSON, UniqueConstraint
 )
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column, relationship, Session
+from sqlalchemy.exc import IntegrityError
 
 from passlib.context import CryptContext
 from jose import jwt, JWTError
@@ -388,31 +389,51 @@ def health():
 
 # ---- Auth ----
 @app.post("/auth/register", response_model=TokenResponse)
+@app.post("/auth/register", response_model=TokenResponse)
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
-    # create or fetch tenant
-    tenant = db.query(Tenant).filter(Tenant.name == req.tenant_name).first()
-    if not tenant:
-        tenant = Tenant(name=req.tenant_name)
-        db.add(tenant)
+    try:
+        # create or fetch tenant
+        tenant = db.query(Tenant).filter(Tenant.name == req.tenant_name).first()
+        if not tenant:
+            tenant = Tenant(name=req.tenant_name)
+            db.add(tenant)
+            db.commit()
+            db.refresh(tenant)
+
+        # email must be unique across system
+        if db.query(User).filter(User.email == req.email).first():
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+        # first user is OWNER for this tenant
+        user = User(
+            tenant_id=tenant.id,
+            email=req.email,
+            password_hash=hash_password(req.password),
+            role="OWNER"
+        )
+        db.add(user)
         db.commit()
-        db.refresh(tenant)
 
-    # email must be unique across system
-    if db.query(User).filter(User.email == req.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
+        token = create_access_token(
+            sub=user.email,
+            tenant_id=user.tenant_id,
+            role=user.role
+        )
+        return TokenResponse(access_token=token)
 
-    # first user is OWNER for this tenant
-    user = User(
-        tenant_id=tenant.id,
-        email=req.email,
-        password_hash=hash_password(req.password),
-        role="OWNER"
-    )
-    db.add(user)
-    db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Registration failed (duplicate tenant or email). Try a different tenant name/email."
+        )
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Server error during registration. Please try again."
+        )
 
-    token = create_access_token(sub=user.email, tenant_id=user.tenant_id, role=user.role)
-    return TokenResponse(access_token=token)
 
 @app.post("/auth/login", response_model=TokenResponse)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
