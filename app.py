@@ -389,7 +389,6 @@ def health():
 
 # ---- Auth ----
 @app.post("/auth/register", response_model=TokenResponse)
-@app.post("/auth/register", response_model=TokenResponse)
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     try:
         # create or fetch tenant
@@ -421,55 +420,26 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         )
         return TokenResponse(access_token=token)
 
-    except IntegrityError:
+    except IntegrityError as e:
+
         db.rollback()
         raise HTTPException(
             status_code=400,
             detail="Registration failed (duplicate tenant or email). Try a different tenant name/email."
         )
-       except Exception as e:
+    except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=500,
             detail=f"Server error during registration: {type(e).__name__}: {str(e)}"
         )
 
-        )
+        
 
 
-@app.post("/auth/login", response_model=TokenResponse)
-def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form.username).first()
-    if not user or not verify_password(form.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = create_access_token(sub=user.email, tenant_id=user.tenant_id, role=user.role)
-    return TokenResponse(access_token=token)
-
-@app.get("/me")
-def me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    tenant = db.query(Tenant).filter(Tenant.id == current_user.tenant_id).first()
-    return {
-        "email": current_user.email,
-        "role": current_user.role,
-        "tenant": tenant.name if tenant else None,
-        "tenant_id": current_user.tenant_id
-    }
-
-# ---- Users (OWNER/ADMIN only) ----
-@app.get("/tenant/users", response_model=list[UserOut])
-def list_users(current_user: User = Depends(require_role({"OWNER", "ADMIN"})), db: Session = Depends(get_db)):
-    users = db.query(User).filter(User.tenant_id == current_user.tenant_id).order_by(User.created_at.asc()).all()
-    return [
-        UserOut(email=u.email, role=u.role, created_at=u.created_at.isoformat())
-        for u in users
-    ]
-
-@app.post("/tenant/users", response_model=dict)
-def create_user(payload: CreateUserRequest, current_user: User = Depends(require_role({"OWNER", "ADMIN"})), db: Session = Depends(get_db)):
-    # Prevent creating OWNER via this endpoint
-    if payload.role not in ("ADMIN", "DISPATCHER"):
-        raise HTTPException(status_code=400, detail="Role must be ADMIN or DISPATCHER")
-
+Deploy failed for 2735632: Update app.py
+Exited with status 1 while running your code. Check your deploy logs for more information.
+January 5, 2026 at 3:50 AM
     if db.query(User).filter(User.email == payload.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
