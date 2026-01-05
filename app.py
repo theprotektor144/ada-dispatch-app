@@ -427,11 +427,13 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
             status_code=400,
             detail="Registration failed (duplicate tenant or email). Try a different tenant name/email."
         )
-    except Exception:
+       except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="Server error during registration. Please try again."
+            detail=f"Server error during registration: {type(e).__name__}: {str(e)}"
+        )
+
         )
 
 
