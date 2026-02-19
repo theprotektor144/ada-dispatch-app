@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #0d1117;
+  --color-foreground: #e6edf3;
+  --color-surface: #161b22;
+  --color-surface-light: #21262d;
+  --color-border: #30363d;
+  --color-muted: #8b949e;
+  --color-aurora: #00ffcc;
+  --color-plasma: #9945ff;
+  --color-solar: #ffd700;
+  --color-nebula: #ff6b9d;
+  --color-aurora-dim: #00cc99;
+  --color-plasma-dim: #7a33cc;
+  --color-solar-dim: #cca700;
+  --font-sans: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #30363d #0d1117;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Quantum Gradient Background */
+.quantum-bg {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(153, 69, 255, 0.15), transparent),
+              radial-gradient(ellipse 60% 40% at 80% 50%, rgba(0, 255, 204, 0.08), transparent),
+              radial-gradient(ellipse 60% 40% at 20% 80%, rgba(255, 215, 0, 0.05), transparent),
+              #0d1117;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(22, 27, 34, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(48, 54, 61, 0.5);
+}
+
+.glass-strong {
+  background: rgba(22, 27, 34, 0.8);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(48, 54, 61, 0.6);
+}
+
+/* Glow Effects */
+.glow-aurora {
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.15),
+              0 0 60px rgba(0, 255, 204, 0.05);
+}
+
+.glow-plasma {
+  box-shadow: 0 0 20px rgba(153, 69, 255, 0.15),
+              0 0 60px rgba(153, 69, 255, 0.05);
+}
+
+.glow-solar {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.15),
+              0 0 60px rgba(255, 215, 0, 0.05);
+}
+
+/* Text Gradients */
+.text-gradient-aurora {
+  background: linear-gradient(135deg, #00ffcc, #00cc99, #9945ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-plasma {
+  background: linear-gradient(135deg, #9945ff, #ff6b9d, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-solar {
+  background: linear-gradient(135deg, #ffd700, #ff6b9d, #9945ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-full {
+  background: linear-gradient(135deg, #00ffcc, #9945ff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated border gradient */
+.border-gradient {
+  position: relative;
+  border: none;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.4), rgba(153, 69, 255, 0.4), rgba(255, 215, 0, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Grid pattern overlay */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(48, 54, 61, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(48, 54, 61, 0.3) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Particle canvas base */
+.particle-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Noise texture overlay */
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Pulse animation for CTA */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2), 0 0 60px rgba(0, 255, 204, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.35), 0 0 80px rgba(0, 255, 204, 0.1);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Orbit ring animation */
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.orbit {
+  animation: orbit 20s linear infinite;
+}
+
+.orbit-reverse {
+  animation: orbit 25s linear infinite reverse;
+}
